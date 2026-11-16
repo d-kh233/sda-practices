@@ -12,12 +12,11 @@ import java.util.HexFormat;
 
 /**
  * Надёжная стратегия: сравнивает SHA-256 содержимого файла с хэшем из прошлого манифеста.
- * Замечает любое изменение содержимого, но читает каждый файл целиком, поэтому медленнее.
- * Если файл только "потрогали" (дата новая, содержимое прежнее), он НЕ будет скопирован повторно.
+ * Замечает любое изменение содержимого, читает каждый файл целиком, медленнее.
  */
 public class ReliableHashStrategy implements ChangeDetectionStrategy {
 
-    /** Примерная скорость чтения и хэширования: 150 МБ/с (ограничена в основном диском). */
+    
     private static final double HASH_BYTES_PER_SECOND = 150.0 * 1024 * 1024;
     private static final double SECONDS_PER_FILE = 0.0002;
 
@@ -28,7 +27,7 @@ public class ReliableHashStrategy implements ChangeDetectionStrategy {
 
     @Override
     public boolean hasChanged(FileEntry previous, FileEntry current, Path currentFile) throws IOException {
-        // Если размер другой — файл точно изменился, читать его незачем
+        
         if (previous.size() != current.size() || previous.hash() == null) {
             return true;
         }
@@ -40,7 +39,7 @@ public class ReliableHashStrategy implements ChangeDetectionStrategy {
         return fileCount * SECONDS_PER_FILE + totalBytes / HASH_BYTES_PER_SECOND;
     }
 
-    /** Считает SHA-256 файла и возвращает его в виде hex-строки из 64 символов. */
+    
     public static String sha256(Path file) throws IOException {
         MessageDigest digest = newSha256Digest();
         try (InputStream in = Files.newInputStream(file)) {
@@ -53,7 +52,7 @@ public class ReliableHashStrategy implements ChangeDetectionStrategy {
         return HexFormat.of().formatHex(digest.digest());
     }
 
-    /** SHA-256 обязан поддерживаться любой JVM, поэтому исключение здесь практически невозможно. */
+    
     public static MessageDigest newSha256Digest() {
         try {
             return MessageDigest.getInstance("SHA-256");

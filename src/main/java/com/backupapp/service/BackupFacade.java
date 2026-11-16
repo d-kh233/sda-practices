@@ -12,12 +12,7 @@ import java.util.List;
 /**
  * ПАТТЕРН "ФАСАД" (Facade, структурный).
  *
- * Единственная точка входа в логику приложения для графического интерфейса.
- * Скрывает за простыми методами работу с ZIP, JSON-манифестами, цепочками копий,
- * проверкой места и обходом папок. Кроме того, фасад переводит технические
- * IOException в понятные пользователю {@link BackupException}.
- *
- * UI не знает о существовании ZipArchiver, BackupCatalog, FolderScanner и т.д.
+ * 
  */
 public class BackupFacade {
 
@@ -49,7 +44,7 @@ public class BackupFacade {
         }
     }
 
-    /** Для таймера: если копий этой папки ещё нет — полная, иначе инкрементальная. */
+    
     public BackupManifest createAutoBackup(BackupJob job) throws BackupException {
         try {
             return backupService.hasBackups(job) ? createIncrementalBackup(job) : createFullBackup(job);
@@ -58,7 +53,7 @@ public class BackupFacade {
         }
     }
 
-    /** Восстанавливает папку на момент выбранной копии. Возвращает число файлов в восстановленной папке. */
+    
     public int restoreBackup(Path storageDir, BackupManifest backup, Path restoreDir) throws BackupException {
         Path storage = storageDir.toAbsolutePath().normalize();
         if (restoreDir.toAbsolutePath().normalize().startsWith(storage)) {
@@ -79,7 +74,7 @@ public class BackupFacade {
         }
     }
 
-    /** Копии, которые станут непригодны, если удалить данную (её инкременты). */
+    
     public List<BackupManifest> findDependentBackups(Path storageDir, BackupManifest backup) throws BackupException {
         try {
             return catalog.findDependents(storageDir, backup);
@@ -90,7 +85,7 @@ public class BackupFacade {
 
     /**
      * Удаляет копию вместе со всеми зависящими от неё инкрементами.
-     * Удаляем с самых новых: если что-то пойдёт не так, оставшаяся цепочка будет целой.
+     * Удаляем с самых новых
      */
     public void deleteBackup(Path storageDir, BackupManifest backup) throws BackupException {
         try {
@@ -105,7 +100,7 @@ public class BackupFacade {
         }
     }
 
-    /** Текст с оценкой времени для обоих режимов и свободным местом. */
+    
     public String estimateTime(BackupJob job) throws BackupException {
         try {
             return backupService.estimate(job);

@@ -36,11 +36,11 @@ public class BackupCatalog {
     private static final String PREFIX = "backup_";
 
     private final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()       // JSON с отступами — его удобно открыть и прочитать
-            .disableHtmlEscaping()     // символы вроде ' и = в именах файлов пишутся как есть
+            .setPrettyPrinting()       
+            .disableHtmlEscaping()     
             .create();
 
-    /** Все копии в хранилище, от старых к новым. Повреждённые манифесты пропускаются. */
+    
     public List<BackupManifest> loadAll(Path storageDir) throws IOException {
         List<BackupManifest> result = new ArrayList<>();
         if (!Files.isDirectory(storageDir)) {
@@ -54,16 +54,16 @@ public class BackupCatalog {
                         result.add(manifest);
                     }
                 } catch (JsonParseException | IOException e) {
-                    // Чужой или повреждённый файл — просто не показываем его в списке
+                    
                 }
             }
         }
-        // id начинается с даты и времени, поэтому сортировка по id = сортировка по времени
+        
         result.sort(Comparator.comparing(BackupManifest::getId));
         return result;
     }
 
-    /** Сохраняет манифест. Тоже через временный файл, чтобы не оставить "половину" JSON. */
+    
     public void save(Path storageDir, BackupManifest manifest) throws IOException {
         Path file = manifestPath(storageDir, manifest);
         Path tempFile = file.resolveSibling(file.getFileName() + ".tmp");
@@ -71,7 +71,7 @@ public class BackupCatalog {
         Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    /** Последняя копия указанной исходной папки (от неё строится следующий инкремент). */
+    
     public Optional<BackupManifest> findLast(Path storageDir, Path sourceDir) throws IOException {
         List<BackupManifest> all = loadAll(storageDir);
         for (int i = all.size() - 1; i >= 0; i--) {
@@ -106,16 +106,16 @@ public class BackupCatalog {
             }
             current = parent;
         }
-        Collections.reverse(chain); // шли от выбранной копии назад, а применять нужно с полной
+        Collections.reverse(chain); 
         return chain;
     }
 
-    /** Все копии, которые напрямую или через другие инкременты зависят от данной. */
+    
     public List<BackupManifest> findDependents(Path storageDir, BackupManifest base) throws IOException {
         Set<String> dependentIds = new HashSet<>();
         dependentIds.add(base.getId());
         List<BackupManifest> dependents = new ArrayList<>();
-        // Список отсортирован по времени, значит "родитель" всегда встречается раньше "потомка"
+        
         for (BackupManifest manifest : loadAll(storageDir)) {
             if (manifest.getParentId() != null && dependentIds.contains(manifest.getParentId())) {
                 dependentIds.add(manifest.getId());
@@ -143,9 +143,9 @@ public class BackupCatalog {
         }
     }
 
-    /** Удаляет архив и манифест одной копии. */
+    
     public void delete(Path storageDir, BackupManifest manifest) throws IOException {
-        // Сначала манифест: без него копия сразу пропадает из списка
+        
         Files.deleteIfExists(manifestPath(storageDir, manifest));
         Files.deleteIfExists(archivePath(storageDir, manifest));
     }
@@ -163,7 +163,7 @@ public class BackupCatalog {
         return PREFIX + manifest.getId() + suffix;
     }
 
-    /** Path.equals на Windows не учитывает регистр букв, на Linux — учитывает, как и сама ОС. */
+    
     private static boolean isSameFolder(Path folder, String savedPath) {
         try {
             return savedPath != null && folder.equals(Path.of(savedPath));

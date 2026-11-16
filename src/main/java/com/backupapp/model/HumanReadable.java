@@ -1,12 +1,12 @@
 package com.backupapp.model;
 
 /**
- * Перевод байтов и секунд в понятный человеку вид: "1,5 МБ", "2 мин 10 с".
+ * Перевод байтов и секунд в понятный вид: "1,5 МБ", "2 мин 10 с".
  */
 public final class HumanReadable {
 
     private HumanReadable() {
-        // только статические методы
+        
     }
 
     public static String size(long bytes) {

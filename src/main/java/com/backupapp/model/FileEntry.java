@@ -11,7 +11,7 @@ package com.backupapp.model;
  */
 public record FileEntry(String path, long size, long lastModified, String hash) {
 
-    /** Возвращает копию записи с другим хэшем (record неизменяемый, поэтому создаём новый объект). */
+    
     public FileEntry withHash(String newHash) {
         return new FileEntry(path, size, lastModified, newHash);
     }

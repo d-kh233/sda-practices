@@ -9,12 +9,11 @@ import java.nio.file.Path;
  * ПАТТЕРН "СТРАТЕГИЯ" (Strategy, поведенческий).
  *
  * Общий интерфейс для способов определить, изменился ли файл с момента прошлой копии
- * (UR-4, FR-3). Сервис копирования работает только с этим интерфейсом и не знает,
- * какая реализация ему передана: быстрая или надёжная.
+ * (UR-4, FR-3). 
  */
 public interface ChangeDetectionStrategy {
 
-    /** Название режима для пользователя (показывается в окне и пишется в манифест). */
+    
     String getName();
 
     /**
@@ -25,6 +24,6 @@ public interface ChangeDetectionStrategy {
      */
     boolean hasChanged(FileEntry previous, FileEntry current, Path currentFile) throws IOException;
 
-    /** Примерное время в секундах, которое займёт проверка папки этим способом (UR-9, NFR-1). */
+    
     double estimateCheckSeconds(long fileCount, long totalBytes);
 }

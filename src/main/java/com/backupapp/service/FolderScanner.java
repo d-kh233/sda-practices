@@ -13,14 +13,11 @@ import java.util.TreeMap;
 
 /**
  * Обходит исходную папку и собирает размер и дату изменения каждого файла.
- * Содержимое файлов здесь не читается, поэтому обход быстрый.
+ * Содержимое файлов не читается, поэтому обход быстрый.
  */
 public class FolderScanner {
 
-    /**
-     * @return словарь "относительный путь -> сведения о файле" (хэш пока не заполнен),
-     *         отсортированный по пути
-     */
+    
     public Map<String, FileEntry> scan(Path folder) throws IOException {
         Map<String, FileEntry> result = new TreeMap<>();
         Files.walkFileTree(folder, new SimpleFileVisitor<>() {
@@ -36,14 +33,14 @@ public class FolderScanner {
 
             @Override
             public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                // Нет доступа к файлу или системной подпапке — пропускаем, а не прерываем всю копию
+                
                 return FileVisitResult.CONTINUE;
             }
         });
         return result;
     }
 
-    /** "C:\Docs" + "C:\Docs\work\a.txt" -> "work/a.txt" (всегда с "/", чтобы работать на любой ОС). */
+    
     public static String toRelativePath(Path folder, Path file) {
         return folder.relativize(file).toString().replace('\\', '/');
     }

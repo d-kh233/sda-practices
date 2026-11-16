@@ -11,19 +11,7 @@ import java.nio.file.Path;
 /**
  * ПАТТЕРН "СТРОИТЕЛЬ" (Builder, порождающий).
  *
- * Пошагово собирает задание {@link BackupJob}. Обязательные параметры — исходная папка
- * и хранилище, необязательные (способ проверки, сжатие) имеют значения по умолчанию.
- * Все проверки выполняются в одном месте — в методе {@link #build()}.
- *
- * Пример:
- * <pre>
- * BackupJob job = new BackupJobBuilder()
- *         .sourceFolder("C:\\Documents")
- *         .storageFolder("E:\\Backups")
- *         .changeDetection(new ReliableHashStrategy())
- *         .compression(true)
- *         .build();
- * </pre>
+ * 
  */
 public class BackupJobBuilder {
 
@@ -55,14 +43,14 @@ public class BackupJobBuilder {
     /**
      * Проверяет параметры и создаёт задание.
      *
-     * @throws IllegalArgumentException с понятным сообщением, если параметры неверны
+     * 
      */
     public BackupJob build() {
         Path source = toExistingFolder(sourceFolder, "исходную папку");
         Path storage = toExistingFolder(storageFolder, "папку-хранилище");
 
-        // FR-13: защита от рекурсии. Path.startsWith сравнивает целые части пути,
-        // поэтому "C:\Data2" НЕ считается вложенной в "C:\Data".
+        // FR-13: защита от рекурсии
+        
         if (storage.startsWith(source)) {
             throw new IllegalArgumentException(
                     "Папка-хранилище не может совпадать с исходной папкой или находиться внутри неё:\n"
@@ -74,7 +62,7 @@ public class BackupJobBuilder {
         return new BackupJob(source, storage, strategy, compression);
     }
 
-    /** Превращает строку в путь к существующей папке (настоящий путь, без ".." и ссылок). */
+    /** Превращает строку в путь к существующей папке */
     private static Path toExistingFolder(String path, String whatToChoose) {
         if (path == null || path.isBlank()) {
             throw new IllegalArgumentException("Выберите " + whatToChoose + ".");

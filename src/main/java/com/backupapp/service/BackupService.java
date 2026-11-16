@@ -26,14 +26,14 @@ import java.util.TreeMap;
 /**
  * Создание полных и инкрементальных копий и оценка времени.
  *
- * Здесь же используется паттерн "Стратегия": для сравнения файлов вызывается
- * job.getStrategy().hasChanged(...), а какая именно стратегия — сервису неважно.
+ *  паттерн "Стратегия": для сравнения файлов вызывается
+ * job.getStrategy().hasChanged(...)
  */
 public class BackupService {
 
-    /** Примерная скорость упаковки в ZIP со сжатием: 40 МБ/с. Для оценки времени этого достаточно. */
+    
     private static final double ZIP_BYTES_PER_SECOND = 40.0 * 1024 * 1024;
-    /** Запас места под манифест и служебные данные ZIP. */
+    
     private static final long SPACE_RESERVE_BYTES = 10L * 1024 * 1024;
     private static final DateTimeFormatter ID_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS");
 
@@ -48,7 +48,7 @@ public class BackupService {
         this.scanner = scanner;
     }
 
-    /** FR-1: полная копия — в архив попадают все файлы папки. */
+    
     public BackupManifest createFull(BackupJob job) throws IOException, BackupException {
         Map<String, FileEntry> currentFiles = scanner.scan(job.getSourceDir());
         if (currentFiles.isEmpty()) {
@@ -79,9 +79,9 @@ public class BackupService {
         for (FileEntry file : currentFiles.values()) {
             FileEntry old = previousFiles.get(file.path());
             if (old == null || isChanged(strategy, old, file, job.getSourceDir())) {
-                toCopy.add(file.path());                         // новый или изменённый
+                toCopy.add(file.path());                         
             } else {
-                snapshot.put(file.path(), file.withHash(old.hash())); // не изменился: хэш берём из прошлой копии
+                snapshot.put(file.path(), file.withHash(old.hash())); 
             }
         }
 
@@ -102,14 +102,14 @@ public class BackupService {
         return packAndSave(job, manifest, currentFiles, toCopy, snapshot);
     }
 
-    /** Есть ли в хранилище хотя бы одна копия этой папки. */
+    
     public boolean hasBackups(BackupJob job) throws IOException {
         return catalog.findLast(job.getStorageDir(), job.getSourceDir()).isPresent();
     }
 
     /**
      * UR-9, NFR-1: оценка времени для полной копии и для инкремента в обоих режимах проверки.
-     * Время проверки каждая стратегия оценивает сама — это тоже работа паттерна "Стратегия".
+     * Время проверки каждая стратегия оценивает сама = работа паттерна "Стратегия".
      */
     public String estimate(BackupJob job) throws IOException {
         Map<String, FileEntry> currentFiles = scanner.scan(job.getSourceDir());
@@ -132,7 +132,7 @@ public class BackupService {
             return text.toString();
         }
 
-        // Сколько данных придётся упаковать, прикидываем быстрым способом — это мгновенно
+        
         Map<String, FileEntry> previousFiles = last.get().getFilesAsMap();
         FastMetadataStrategy quickCheck = new FastMetadataStrategy();
         long changedBytes = 0;
@@ -158,11 +158,10 @@ public class BackupService {
         return text.toString();
     }
 
-    // ---------------------------------------------------------------- вспомогательные методы
+    
 
     /**
-     * Пакует файлы в ZIP и сохраняет манифест. Манифест пишется ПОСЛЕДНИМ: пока его нет,
-     * копия не видна в списке. Если манифест записать не удалось, архив удаляется.
+     * Пакует файлы в ZIP и сохраняет манифест. Манифест пишется последним
      */
     private BackupManifest packAndSave(BackupJob job, BackupManifest manifest, Map<String, FileEntry> currentFiles,
                                        List<String> toCopy, Map<String, FileEntry> snapshot) throws IOException {
@@ -176,7 +175,7 @@ public class BackupService {
                 snapshot.put(path, currentFiles.get(path).withHash(hash));
                 manifest.getChangedFiles().add(path);
             } else {
-                manifest.getSkippedFiles().add(path); // не удалось прочитать — попробуем в следующий раз
+                manifest.getSkippedFiles().add(path); 
             }
         }
         manifest.setFiles(new ArrayList<>(snapshot.values()));
@@ -204,14 +203,14 @@ public class BackupService {
         return manifest;
     }
 
-    /** Время новой копии. Гарантирует, что две копии подряд (например, в тестах) не получат одинаковый id. */
+    
     private synchronized LocalDateTime nextBackupTime() {
         long millis = Math.max(System.currentTimeMillis(), lastBackupMillis + 1);
         lastBackupMillis = millis;
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
     }
 
-    /** Если файл не удалось прочитать для хэша (занят), считаем его изменённым — попробуем скопировать. */
+    
     private static boolean isChanged(ChangeDetectionStrategy strategy, FileEntry old, FileEntry current, Path sourceDir) {
         try {
             return strategy.hasChanged(old, current, sourceDir.resolve(current.path()));
@@ -222,7 +221,7 @@ public class BackupService {
 
     /**
      * FR-7: проверка свободного места. Берём размер файлов без сжатия — это верхняя граница.
-     * getUsableSpace() точнее, чем getFreeSpace(): учитывает квоты и права пользователя.
+     * 
      */
     private static void checkFreeSpace(Path storageDir, long bytesToCopy) throws BackupException {
         long freeBytes = storageDir.toFile().getUsableSpace();

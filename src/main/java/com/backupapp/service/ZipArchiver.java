@@ -27,16 +27,7 @@ public class ZipArchiver {
 
     private static final int BUFFER_SIZE = 64 * 1024;
 
-    /**
-     * Упаковывает файлы в ZIP. Архив сначала пишется во временный файл "*.zip.tmp"
-     * и только после успешного завершения переименовывается в "*.zip" (NFR-2).
-     * При любой ошибке временный файл удаляется — битых копий не остаётся.
-     *
-     * Хэш SHA-256 считается "на лету", пока файл упаковывается, поэтому файл читается один раз.
-     *
-     * @return хэши упакованных файлов. Файлы, которые не удалось открыть
-     *         (например, заняты другой программой), в результат не попадают
-     */
+    
     public Map<String, String> createZip(Path sourceDir, Collection<String> relativePaths,
                                          Path zipFile, boolean compress) throws IOException {
         Path tempFile = zipFile.resolveSibling(zipFile.getFileName() + ".tmp");
@@ -52,7 +43,7 @@ public class ZipArchiver {
                     try {
                         fileInput = Files.newInputStream(file);
                     } catch (IOException e) {
-                        // Файл занят или успел исчезнуть — пропускаем, он попадёт в следующую копию
+                        
                         continue;
                     }
 
@@ -70,7 +61,7 @@ public class ZipArchiver {
                     hashes.put(relativePath, HexFormat.of().formatHex(digest.digest()));
                 }
             }
-            // Архив полностью записан — только теперь он получает "настоящее" имя
+            
             Files.move(tempFile, zipFile, StandardCopyOption.REPLACE_EXISTING);
             return hashes;
         } catch (IOException | RuntimeException e) {
@@ -88,7 +79,7 @@ public class ZipArchiver {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
                 Path target = root.resolve(entry.getName()).normalize();
-                // Защита от "Zip Slip": имя вида "../../Windows/x.dll" не должно выйти за пределы папки
+                
                 if (!target.startsWith(root)) {
                     throw new IOException("архив повреждён (недопустимый путь " + entry.getName() + ")");
                 }
@@ -109,7 +100,7 @@ public class ZipArchiver {
         try {
             Files.deleteIfExists(file);
         } catch (IOException ignored) {
-            // Не получилось удалить временный файл — главное сообщить об исходной ошибке
+            
         }
     }
 }

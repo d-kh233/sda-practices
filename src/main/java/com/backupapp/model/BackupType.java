@@ -13,7 +13,7 @@ public enum BackupType {
         this.displayName = displayName;
     }
 
-    /** Название для показа пользователю. */
+    
     public String getDisplayName() {
         return displayName;
     }

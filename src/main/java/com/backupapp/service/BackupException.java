@@ -40,7 +40,7 @@ public class BackupException extends Exception {
         return new BackupException(action + ": " + reason + ".", e);
     }
 
-    /** Windows и Linux сообщают о нехватке места по-разному, проверяем самые частые варианты. */
+    
     private static boolean isDiskFull(String message) {
         String text = message.toLowerCase();
         return text.contains("not enough space")

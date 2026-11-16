@@ -10,9 +10,6 @@ import java.util.List;
 /**
  * Восстановление папки на момент выбранной копии (UR-2, FR-8, FR-9).
  *
- * Алгоритм: берём цепочку [Полная, Инкремент 1, ..., Выбранная] и по очереди
- * распаковываем архивы поверх друг друга. После каждой копии удаляем файлы
- * из её списка deletedFiles — так папка проходит те же изменения, что и оригинал.
  */
 public class RestoreService {
 
@@ -30,7 +27,7 @@ public class RestoreService {
     public int restore(Path storageDir, BackupManifest target, Path restoreDir) throws IOException, BackupException {
         List<BackupManifest> chain = catalog.buildChain(storageDir, target);
 
-        // Сначала убеждаемся, что все архивы на месте, — чтобы не восстановить папку наполовину
+        
         for (BackupManifest manifest : chain) {
             if (!Files.isRegularFile(catalog.archivePath(storageDir, manifest))) {
                 throw new BackupException("Не найден архив копии от " + manifest.getCreatedAtText()
@@ -44,7 +41,7 @@ public class RestoreService {
             archiver.extractZip(catalog.archivePath(storageDir, manifest), root);
             for (String deletedPath : manifest.getDeletedFiles()) {
                 Path file = root.resolve(deletedPath).normalize();
-                if (file.startsWith(root)) { // не даём удалить что-то за пределами папки восстановления
+                if (file.startsWith(root)) { 
                     Files.deleteIfExists(file);
                 }
             }

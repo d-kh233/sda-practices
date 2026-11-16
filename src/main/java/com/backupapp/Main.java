@@ -13,14 +13,14 @@ import javax.swing.UIManager;
 public class Main {
 
     public static void main(String[] args) {
-        FlatLightLaf.setup();          // современный внешний вид вместо стандартного Swing
+        FlatLightLaf.setup();          
         translateStandardDialogs();
 
         // Все действия с окнами Swing выполняются в специальном потоке EDT
         SwingUtilities.invokeLater(() -> new MainWindow(new BackupFacade()).setVisible(true));
     }
 
-    /** В JDK нет русского перевода стандартных диалогов, поэтому задаём подписи сами. */
+   
     private static void translateStandardDialogs() {
         UIManager.put("OptionPane.yesButtonText", "Да");
         UIManager.put("OptionPane.noButtonText", "Нет");

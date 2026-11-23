@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Координаты проекта: из artifactId и version получается имя JAR: backup-app-1.0.jar -->
+    <groupId>com.backupapp</groupId>
+    <artifactId>backup-app</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>Backup App</name>
+    <description>Настольное приложение для полного и инкрементального резервного копирования папок</description>
+
+    <properties>
+        <!-- Требуемая версия JDK (не ниже 17) -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <!-- Без этой строки на Windows русские строки в коде могут превратиться в "кракозябры" -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Точка входа приложения -->
+        <main.class>com.backupapp.Main</main.class>
+
+        <flatlaf.version>3.6.1</flatlaf.version>
+        <gson.version>2.13.1</gson.version>
+        <junit.version>5.11.4</junit.version>
+    </properties>
+
+    <dependencies>
+        <!-- Современный внешний вид для Swing -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlaf.version}</version>
+        </dependency>
+
+        <!-- Чтение и запись JSON-манифестов копий -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+
+        <!-- Юнит-тесты (нужны только при сборке, в итоговый JAR не попадают) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Компиляция под Java 17 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <!-- Запуск тестов JUnit 5 на фазе test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+
+            <!-- Сборка исполняемого fat-JAR (код приложения + все библиотеки в одном файле) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Не создавать dependency-reduced-pom.xml в корне проекта -->
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <!-- Прописывает Main-Class в MANIFEST.MF, чтобы работал java -jar -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${main.class}</mainClass>
+                                    <manifestEntries>
+                                        <!-- FlatLaf содержит отдельные классы для Java 9+ -->
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <!-- Убираем служебные файлы библиотек, которые мешают в fat-JAR -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/*/module-info.class</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
